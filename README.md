@@ -44,7 +44,7 @@ sudo apt install git stow tmux neovim build-essential
 ## Installation
 
 ```bash
-git clone https://github.com/<user>/configurations.git ~/configurations
+git clone https://github.com/justhasanuknow/configurations.git ~/configurations
 cd ~/configurations
 stow tmux nvim
 ```
