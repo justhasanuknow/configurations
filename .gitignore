@@ -1,0 +1,10 @@
+cd ~/configurations
+cat > .gitignore <<'EOF'
+*.swp
+*~
+.DS_Store
+nvim/.config/nvim/spell/
+EOF
+
+git add -A
+git status
