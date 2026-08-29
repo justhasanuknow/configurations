@@ -29,3 +29,4 @@ vim.opt.timeoutlen = 300
 vim.opt.clipboard = "unnamedplus"
 
 -- Hello this is a test for git integration
+-- this is a test also
