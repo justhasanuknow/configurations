@@ -1,7 +1,6 @@
 -- Fuzzy finder: files, live grep, buffers, git and more through one interface
 return {
   "nvim-telescope/telescope.nvim",
-  branch = "0.1.x",
   dependencies = {
     "nvim-lua/plenary.nvim",
     -- Native C sorter, much faster on large projects
