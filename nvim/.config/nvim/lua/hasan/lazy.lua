@@ -17,21 +17,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Read plugin definitions from lua/hasan/plugins
-
-local extra_rtp = {}
-if vim.fn.isdirectory("/usr/lib/nvim") == 1 then
-  table.insert(extra_rtp, "/usr/lib/nvim")
-end
-
 require("lazy").setup({
   spec = {
     { import = "hasan.plugins" },
   },
   install = { colorscheme = { "habamax" } },
   checker = { enabled = false },
-  performance = {
-    rtp = {
-      paths = extra_rtp,
-    },
-  },
 })
