@@ -7,7 +7,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGES=(tmux nvim)
+PACKAGES=(tmux nvim scripts)
 STAMP="$(date +%Y%m%d%H%M%S)"
 
 # Minimum versions required by the Neovim config
@@ -56,7 +56,7 @@ install_packages_debian() {
     sudo apt update
     sudo apt install -y \
         git stow tmux build-essential curl unzip \
-        nodejs npm python3-venv ripgrep fd-find lazygit
+        nodejs npm python3-venv ripgrep fd-find lazygit fzf
 
     # fd ships as fdfind on Debian and Ubuntu
     mkdir -p "$HOME/.local/bin"
@@ -69,7 +69,7 @@ install_packages_arch() {
     info "Installing packages with pacman"
     sudo pacman -S --needed --noconfirm \
         git stow tmux base-devel curl unzip \
-        nodejs npm ripgrep fd lazygit \
+        nodejs npm ripgrep fd lazygit fzf \
         neovim tree-sitter-cli
 }
 
@@ -126,6 +126,23 @@ ensure_tree_sitter() {
     unzip -o /tmp/tree-sitter.zip -d /tmp
     sudo install -m 755 /tmp/tree-sitter /usr/local/bin/tree-sitter
     hash -r
+}
+
+# --- tmux plugin manager -----------------------------------------------------
+
+install_tpm() {
+    local tpm_dir="$HOME/.tmux/plugins/tpm"
+
+    if [ -d "$tpm_dir" ]; then
+        info "TPM already installed"
+        return
+    fi
+
+    info "Installing TPM"
+    git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+
+    # Install the plugins declared in .tmux.conf without starting a client
+    "$tpm_dir/bin/install_plugins" || warn "TPM plugin install failed; run prefix+I inside tmux"
 }
 
 # --- Git identity ------------------------------------------------------------
@@ -219,6 +236,7 @@ main() {
     setup_git_identity
     backup_conflicts
     link_packages
+    install_tpm
     sync_plugins
 
     info "Done."

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Fuzzy-pick a project directory and switch to (or create) its tmux session
+
+# Where projects live; adjust as needed
+search_dirs=(~/programming)
+
+if [[ $# -eq 1 ]]; then
+    selected="$1"
+else
+    selected="$(find "${search_dirs[@]}" -mindepth 0 -maxdepth 1 -type d 2>/dev/null | fzf)"
+fi
+
+[[ -z "$selected" ]] && exit 0
+
+session_name="$(basename "$selected" | tr . _)"
+
+# Start the session if it does not exist yet
+if ! tmux has-session -t="$session_name" 2>/dev/null; then
+    tmux new-session -ds "$session_name" -c "$selected"
+fi
+
+# Attach or switch, depending on whether we are already inside tmux
+if [[ -z "${TMUX:-}" ]]; then
+    tmux attach-session -t "$session_name"
+else
+    tmux switch-client -t "$session_name"
+fi
