@@ -3,11 +3,17 @@
 # and links the config packages with GNU stow.
 #
 # Supports Debian/Ubuntu (apt) and Arch (pacman).
+#
+# Usage:
+#   ./install.sh            terminal environment only
+#   ./install.sh --desktop  also install and link the Hyprland desktop (Arch only)
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGES=(tmux nvim scripts zsh starship git)
+DESKTOP_PACKAGES=(hypr kitty)
+INSTALL_DESKTOP=0
 STAMP="$(date +%Y%m%d%H%M%S)"
 
 # Minimum versions required by the Neovim config
@@ -56,20 +62,20 @@ install_packages_debian() {
     sudo apt update
     sudo apt install -y \
         git stow tmux build-essential curl unzip \
-        nodejs npm python3-venv ripgrep fd-find lazygit fzf
+        nodejs npm python3-venv ripgrep fd-find lazygit fzf zsh
 
     # fd ships as fdfind on Debian and Ubuntu
     mkdir -p "$HOME/.local/bin"
     ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
 
-    # Ubuntu LTS lags behind on these two, so they are handled separately below
+    # Ubuntu LTS lags behind on neovim and tree-sitter; handled separately below
 }
 
 install_packages_arch() {
     info "Installing packages with pacman"
     sudo pacman -S --needed --noconfirm \
         git stow tmux base-devel curl unzip \
-        nodejs npm ripgrep fd lazygit fzf zsh \
+        nodejs npm ripgrep fd lazygit fzf zsh starship \
         neovim tree-sitter-cli
 }
 
@@ -80,7 +86,7 @@ install_packages() {
         *)
             warn "Unknown distribution, skipping package installation."
             warn "Install these yourself: git stow tmux curl unzip a C compiler"
-            warn "nodejs npm ripgrep fd lazygit neovim tree-sitter-cli"
+            warn "nodejs npm ripgrep fd lazygit fzf zsh starship neovim tree-sitter-cli"
             ;;
     esac
 }
@@ -128,46 +134,28 @@ ensure_tree_sitter() {
     hash -r
 }
 
-# --- tmux plugin manager -----------------------------------------------------
+# --- Desktop (Hyprland) ------------------------------------------------------
 
-install_tpm() {
-    local tpm_dir="$HOME/.tmux/plugins/tpm"
+install_desktop() {
+    [ "$INSTALL_DESKTOP" -eq 1 ] || return 0
 
-    if [ -d "$tpm_dir" ]; then
-        info "TPM already installed"
-        return
+    if [ "$DISTRO" != "arch" ]; then
+        warn "Desktop setup is only supported on Arch-based systems, skipping."
+        return 0
     fi
 
-    info "Installing TPM"
-    git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+    info "Installing Hyprland desktop packages"
+    sudo pacman -S --needed --noconfirm \
+        hyprland xdg-desktop-portal-hyprland \
+        kitty wofi \
+        ttf-jetbrains-mono-nerd
 
-    # Install the plugins declared in .tmux.conf without starting a client
-    "$tpm_dir/bin/install_plugins" || warn "TPM plugin install failed; run prefix+I inside tmux"
-}
-
-# --- Shell -------------------------------------------------------------------
-
-ensure_starship() {
-    if command -v starship >/dev/null; then
-        info "starship already installed"
-        return
+    # Machine-specific Hyprland settings are never committed; seed from the template
+    local machine="$REPO_DIR/hypr/.config/hypr/machine.lua"
+    if [ ! -f "$machine" ]; then
+        cp "$machine.example" "$machine"
+        info "Created hypr/machine.lua from template; adjust monitors for this machine"
     fi
-
-    info "Installing starship from upstream"
-    curl -sS https://starship.rs/install.sh | sh -s -- --yes
-}
-
-set_default_shell() {
-    local zsh_path
-    zsh_path="$(command -v zsh)"
-
-    if [ "$SHELL" = "$zsh_path" ]; then
-        info "zsh is already the default shell"
-        return
-    fi
-
-    info "Setting zsh as the default shell"
-    chsh -s "$zsh_path"
 }
 
 # --- Git identity ------------------------------------------------------------
@@ -236,6 +224,48 @@ link_packages() {
     stow "${PACKAGES[@]}"
 }
 
+# --- tmux plugin manager -----------------------------------------------------
+
+install_tpm() {
+    local tpm_dir="$HOME/.tmux/plugins/tpm"
+
+    if [ -d "$tpm_dir" ]; then
+        info "TPM already installed"
+        return
+    fi
+
+    info "Installing TPM"
+    git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+
+    # Install the plugins declared in .tmux.conf without starting a client
+    "$tpm_dir/bin/install_plugins" || warn "TPM plugin install failed; run prefix+I inside tmux"
+}
+
+# --- Shell -------------------------------------------------------------------
+
+ensure_starship() {
+    if command -v starship >/dev/null; then
+        info "starship already installed"
+        return
+    fi
+
+    info "Installing starship from upstream"
+    curl -sS https://starship.rs/install.sh | sh -s -- --yes
+}
+
+set_default_shell() {
+    local zsh_path
+    zsh_path="$(command -v zsh)"
+
+    if [ "$SHELL" = "$zsh_path" ]; then
+        info "zsh is already the default shell"
+        return
+    fi
+
+    info "Setting zsh as the default shell"
+    chsh -s "$zsh_path"
+}
+
 # --- Neovim plugins ----------------------------------------------------------
 
 sync_plugins() {
@@ -253,11 +283,27 @@ main() {
         exit 1
     fi
 
+    for arg in "$@"; do
+        case "$arg" in
+            --desktop) INSTALL_DESKTOP=1 ;;
+            *)
+                echo "Unknown option: $arg" >&2
+                echo "Usage: $0 [--desktop]" >&2
+                exit 1
+                ;;
+        esac
+    done
+
+    if [ "$INSTALL_DESKTOP" -eq 1 ]; then
+        PACKAGES+=("${DESKTOP_PACKAGES[@]}")
+    fi
+
     info "Detected distribution: $DISTRO"
 
     install_packages
     ensure_neovim
     ensure_tree_sitter
+    install_desktop
     setup_git_identity
     backup_conflicts
     link_packages
@@ -267,8 +313,12 @@ main() {
     sync_plugins
 
     info "Done."
-    echo "    Make sure ~/.local/bin is on your PATH."
-    echo "    Install a Nerd Font and select it in your terminal for icons."
+    echo "    Restart your shell (or log out and back in) to pick up zsh."
+    if [ "$INSTALL_DESKTOP" -eq 1 ]; then
+        echo "    Select the Hyprland session at the login screen."
+    else
+        echo "    Install a Nerd Font and select it in your terminal for icons."
+    fi
 }
 
 main "$@"
