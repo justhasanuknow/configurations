@@ -1,0 +1,10 @@
+# Copy to local.conf and adjust for this machine.
+# monitor = name, resolution@refresh, position, scale
+# Use `hyprctl monitors` to list names.
+
+monitor = , preferred, auto, 1
+
+# Uncomment inside a VM if the cursor is invisible or rendering is broken
+# cursor {
+#     no_hardware_cursors = true
+# }
