@@ -12,7 +12,7 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGES=(tmux nvim scripts zsh starship git)
-DESKTOP_PACKAGES=(hypr kitty)
+DESKTOP_PACKAGES=(hypr kitty waybar)
 INSTALL_DESKTOP=0
 STAMP="$(date +%Y%m%d%H%M%S)"
 
@@ -147,7 +147,7 @@ install_desktop() {
     info "Installing Hyprland desktop packages"
     sudo pacman -S --needed --noconfirm \
         hyprland xdg-desktop-portal-hyprland \
-        kitty wofi \
+        kitty wofi waybar hyprpaper \
         ttf-jetbrains-mono-nerd
 
     # Machine-specific Hyprland settings are never committed; seed from the template
