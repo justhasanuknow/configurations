@@ -26,6 +26,17 @@ alias grep='grep --color=auto'
 alias v='nvim'
 alias lg='lazygit'
 
+# --- fzf ---------------------------------------------------------------------
+# Ctrl-r history search, Ctrl-t file picker, Alt-c directory jump
+if command -v fzf >/dev/null; then
+    source <(fzf --zsh)
+fi
+
+# Use fd for file listing: faster and respects .gitignore
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
+
 # --- Plugins -----------------------------------------------------------------
 # Minimal plugin loader: clone on first use, then source. No framework.
 ZSH_PLUGIN_DIR="$HOME/.local/share/zsh/plugins"
@@ -46,3 +57,9 @@ zsh_plugin() {
 zsh_plugin zsh-users/zsh-autosuggestions
 # Must be loaded last; it hooks into everything that came before
 zsh_plugin zsh-users/zsh-syntax-highlighting
+
+# --- Prompt ------------------------------------------------------------------
+if command -v starship >/dev/null; then
+    eval "$(starship init zsh)"
+fi
+
