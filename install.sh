@@ -7,7 +7,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGES=(tmux nvim scripts zsh starship)
+PACKAGES=(tmux nvim scripts zsh starship git)
 STAMP="$(date +%Y%m%d%H%M%S)"
 
 # Minimum versions required by the Neovim config

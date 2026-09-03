@@ -1,0 +1,44 @@
+# Shared git configuration. Identity and credentials live in ~/.gitconfig.local,
+# which is created by install.sh and never committed.
+
+[core]
+    editor = nvim
+    autocrlf = input
+
+[init]
+    defaultBranch = master
+
+[pull]
+    rebase = true
+
+[push]
+    autoSetupRemote = true
+    default = current
+
+[fetch]
+    prune = true
+
+[rebase]
+    autoStash = true
+
+[merge]
+    conflictstyle = zdiff3
+
+[diff]
+    colorMoved = default
+    algorithm = histogram
+
+[alias]
+    st = status -sb
+    co = checkout
+    sw = switch
+    br = branch
+    ci = commit
+    ca = commit --amend --no-edit
+    lg = log --graph --oneline --decorate --all
+    last = log -1 HEAD --stat
+    unstage = restore --staged
+    undo = reset --soft HEAD~1
+
+[include]
+    path = ~/.gitconfig.local
