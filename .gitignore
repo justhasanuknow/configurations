@@ -2,4 +2,4 @@
 *~
 .DS_Store
 nvim/.config/nvim/spell/
-hypr/.config/hypr/local.conf
+hypr/.config/hypr/machine.lua

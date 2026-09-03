@@ -37,6 +37,16 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
 
+# --- Keybindings -------------------------------------------------------------
+bindkey '^[[1;5C' forward-word      # Ctrl+Right
+bindkey '^[[1;5D' backward-word     # Ctrl+Left
+bindkey '^[[H'    beginning-of-line # Home
+bindkey '^[[F'    end-of-line       # End
+bindkey '^[[3~'   delete-char       # Delete
+
+# Treat / and - as word boundaries, so Ctrl+arrows stop at path segments
+WORDCHARS=${WORDCHARS//[\/-]}
+
 # --- Plugins -----------------------------------------------------------------
 # Minimal plugin loader: clone on first use, then source. No framework.
 ZSH_PLUGIN_DIR="$HOME/.local/share/zsh/plugins"
