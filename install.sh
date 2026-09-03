@@ -7,7 +7,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGES=(tmux nvim scripts)
+PACKAGES=(tmux nvim scripts zsh starship)
 STAMP="$(date +%Y%m%d%H%M%S)"
 
 # Minimum versions required by the Neovim config
@@ -69,7 +69,7 @@ install_packages_arch() {
     info "Installing packages with pacman"
     sudo pacman -S --needed --noconfirm \
         git stow tmux base-devel curl unzip \
-        nodejs npm ripgrep fd lazygit fzf \
+        nodejs npm ripgrep fd lazygit fzf zsh \
         neovim tree-sitter-cli
 }
 
@@ -143,6 +143,31 @@ install_tpm() {
 
     # Install the plugins declared in .tmux.conf without starting a client
     "$tpm_dir/bin/install_plugins" || warn "TPM plugin install failed; run prefix+I inside tmux"
+}
+
+# --- Shell -------------------------------------------------------------------
+
+ensure_starship() {
+    if command -v starship >/dev/null; then
+        info "starship already installed"
+        return
+    fi
+
+    info "Installing starship from upstream"
+    curl -sS https://starship.rs/install.sh | sh -s -- --yes
+}
+
+set_default_shell() {
+    local zsh_path
+    zsh_path="$(command -v zsh)"
+
+    if [ "$SHELL" = "$zsh_path" ]; then
+        info "zsh is already the default shell"
+        return
+    fi
+
+    info "Setting zsh as the default shell"
+    chsh -s "$zsh_path"
 }
 
 # --- Git identity ------------------------------------------------------------
@@ -237,6 +262,8 @@ main() {
     backup_conflicts
     link_packages
     install_tpm
+    ensure_starship
+    set_default_shell
     sync_plugins
 
     info "Done."

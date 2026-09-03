@@ -52,7 +52,7 @@ upstream releases:
 ```bash
 # Packages available from the archive
 sudo apt install git stow tmux build-essential curl unzip \
-                 nodejs npm python3-venv ripgrep fd-find lazygit
+                 nodejs npm python3-venv ripgrep fd-find lazygit fzf zsh
 
 # fd is installed as fdfind on Debian/Ubuntu
 mkdir -p ~/.local/bin && ln -sf "$(which fdfind)" ~/.local/bin/fd
