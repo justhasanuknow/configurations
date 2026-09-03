@@ -11,10 +11,6 @@ hl.config({
   animations = {
     enabled = true,
   },
-  dwindle = {
-    pseudotile = true,
-    preserve_split = true,
-  },
   input = {
     kb_layout = "us",
     follow_mouse = 1,
