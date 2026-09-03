@@ -1,0 +1,9 @@
+-- Copy to machine.lua and adjust for this machine.
+-- List outputs with: hyprctl monitors all
+
+hl.monitor({
+  output = "",
+  mode = "preferred",
+  position = "auto",
+  scale = 1,
+})
