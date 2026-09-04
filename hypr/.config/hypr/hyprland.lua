@@ -14,3 +14,4 @@ end
 require("look")
 require("binds")
 require("rules")
+require("autostart")

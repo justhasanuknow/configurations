@@ -35,3 +35,7 @@ bind("Tab", hl.dsp.focus({ workspace = "previous" }))
 -- Mouse
 bind("mouse:272", hl.dsp.window.drag(), { mouse = true })
 bind("mouse:273", hl.dsp.window.resize(), { mouse = true })
+
+-- Bar
+bind("B", hl.dsp.exec_cmd("pkill -SIGUSR1 waybar"))        -- toggle visibility
+bind("SHIFT + B", hl.dsp.exec_cmd("pkill waybar; waybar")) -- restart after config changes

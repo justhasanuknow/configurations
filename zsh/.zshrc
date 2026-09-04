@@ -2,6 +2,10 @@
 # Own binaries first, so tmux-sessionizer and friends always resolve
 export PATH="$HOME/.local/bin:$PATH"
 
+# --- Environment -------------------------------------------------------------
+export EDITOR=nvim
+export VISUAL=nvim
+
 # --- History -----------------------------------------------------------------
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=50000
