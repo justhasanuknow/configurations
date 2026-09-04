@@ -4,3 +4,4 @@
 nvim/.config/nvim/spell/
 hypr/.config/hypr/machine.lua
 kitty/.config/kitty/local.conf
+*:Zone.Identifier
