@@ -1,0 +1,23 @@
+# Notifications: rose-pine, top-right, five seconds; critical ones stay until dismissed
+
+font=JetBrainsMono Nerd Font 11
+background-color=#191724
+text-color=#e0def4
+border-color=#c4a7e7
+border-size=2
+border-radius=6
+padding=10
+margin=10
+width=350
+anchor=top-right
+default-timeout=5000
+max-visible=5
+
+[urgency=low]
+border-color=#6e6a86
+text-color=#908caa
+
+[urgency=critical]
+border-color=#eb6f92
+background-color=#26233a
+default-timeout=0

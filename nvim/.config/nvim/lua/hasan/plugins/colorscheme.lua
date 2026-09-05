@@ -1,28 +1,33 @@
 -- Colorschemes: loaded first so other plugins pick up their highlight groups.
--- rose-pine is the active one; the rest are kept around to try with
+-- alduin is the active one; the rest are kept around to try with
 -- :Telescope colorscheme
 return {
   {
-    "rose-pine/neovim",
-    name = "rose-pine",
+    -- Vimscript colorscheme, no setup() to call
+    "alessandroyorba/alduin",
     lazy = false,
     priority = 1000,
-    opts = {
-      variant = "main", -- main, moon or dawn
-    },
-    config = function(_, opts)
-      require("rose-pine").setup(opts)
-      vim.cmd.colorscheme("rose-pine")
+    config = function()
+      vim.cmd.colorscheme("alduin")
     end,
   },
 
-  -- Alternatives, not active by default
-  { "folke/tokyonight.nvim", lazy = false, priority = 900 },
-  { "catppuccin/nvim", name = "catppuccin", lazy = false, priority = 900 },
-  { "ellisonleao/gruvbox.nvim", lazy = false, priority = 900 },
-  { "rebelot/kanagawa.nvim", lazy = false, priority = 900 },
-  { "EdenEast/nightfox.nvim", lazy = false, priority = 900 },
-  { "scottmckendry/cyberdream.nvim", lazy = false, priority = 900 },
-  { "sainnhe/everforest", lazy = false, priority = 900 },
-  { "bluz71/vim-moonfly-colors", name = "moonfly", lazy = false, priority = 900 },
+  -- Alternatives, not active by default. Loaded after startup so they cost
+  -- nothing at launch but still show up in :Telescope colorscheme
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    event = "VeryLazy",
+    opts = {
+      variant = "main", -- main, moon or dawn
+    },
+  },
+  { "folke/tokyonight.nvim", event = "VeryLazy" },
+  { "catppuccin/nvim", name = "catppuccin", event = "VeryLazy" },
+  { "ellisonleao/gruvbox.nvim", event = "VeryLazy" },
+  { "rebelot/kanagawa.nvim", event = "VeryLazy" },
+  { "EdenEast/nightfox.nvim", event = "VeryLazy" },
+  { "scottmckendry/cyberdream.nvim", event = "VeryLazy" },
+  { "sainnhe/everforest", event = "VeryLazy" },
+  { "bluz71/vim-moonfly-colors", name = "moonfly", event = "VeryLazy" },
 }

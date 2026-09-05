@@ -14,14 +14,16 @@ with a `git clone` and a single script.
 | `tmux/` | `.tmux.conf` — TPM, resurrect, rose-pine bar | `~/.tmux.conf` |
 | `nvim/` | Neovim config (Lua) | `~/.config/nvim` |
 | `git/` | Shared git settings and aliases | `~/.gitconfig` |
-| `scripts/` | `tmux-sessionizer` | `~/.local/bin/` |
-| `hypr/` | Hyprland (Lua config) and hyprpaper | `~/.config/hypr` |
+| `scripts/` | `tmux-sessionizer`, `screenshot` | `~/.local/bin/` |
+| `hypr/` | Hyprland (Lua config), hyprpaper, hyprlock, hypridle; mako and wofi configs | `~/.config/{hypr,mako,wofi}` |
 | `kitty/` | Terminal emulator | `~/.config/kitty` |
 | `waybar/` | Status bar | `~/.config/waybar` |
 
 The last three make up the desktop and are only linked with `--desktop`.
 
 Each package directory mirrors `$HOME` internally; stow reflects that structure into `$HOME` as symlinks.
+
+Every key binding — shell, tmux, Neovim, Hyprland — is listed in [KEYBINDS.md](KEYBINDS.md).
 
 ### Machine-specific files
 
@@ -41,12 +43,14 @@ Everything below is installed by `install.sh` on Debian/Ubuntu and Arch-based sy
 - git, stow, curl, unzip, a C compiler
 - tmux 3.x, zsh, starship, fzf, ripgrep, fd, lazygit
 - Neovim 0.12+ and tree-sitter CLI 0.26.1+ (Ubuntu ships older versions; the script
-  installs both from upstream releases)
+  installs both from upstream releases, for x86_64 and aarch64)
 - Node.js, npm, python3-venv — for language servers
 - A Nerd Font in your terminal (`ttf-jetbrains-mono-nerd` on Arch; install manually elsewhere)
 
 Desktop (`--desktop`, Arch only): hyprland, xdg-desktop-portal-hyprland, hyprpaper, waybar,
-kitty, wofi.
+kitty, wofi, plus what makes a session usable: hyprlock, hypridle, mako, hyprpolkitagent,
+grim, slurp, wl-clipboard, cliphist, brightnessctl, playerctl. On other distributions
+`--desktop` is ignored and the desktop packages are not linked.
 
 ## Installation
 
@@ -76,30 +80,21 @@ Packages can also be linked by hand: `stow zsh nvim`; unlink with `stow -D nvim`
 ## Shell
 
 zsh, no framework. Two plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are cloned on
-first start by a five-line loader in `.zshrc`. Prompt is starship, single line.
-
-| Key | Action |
-|---|---|
-| `Ctrl-r` | Fuzzy search command history |
-| `Ctrl-t` | Fuzzy pick a file into the command line |
-| `Alt-c` | Fuzzy `cd` into a subdirectory |
-| `→` | Accept the grey autosuggestion |
-| `Ctrl-←` / `Ctrl-→` | Move by word (stops at `/`) |
+first start by a five-line loader in `.zshrc`. Prompt is starship, single line. fzf provides
+history search, file and directory pickers; `fd` feeds them and respects `.gitignore`.
 
 Aliases: `v` → nvim, `lg` → lazygit, `ll` → `ls -lah`.
 
 ## tmux
 
-| Setting | Value |
-|---|---|
-| Prefix | `Ctrl-a` |
-| Reload config | `Ctrl-a r` |
-| Project switcher | `Ctrl-a f` — fuzzy-pick a directory under `~/programming`, switch to or create its session |
-| Save / restore layout | `Ctrl-a Ctrl-s` / `Ctrl-a Ctrl-r` (continuum also saves every 15 min and restores on start) |
-| Plugins | `Ctrl-a I` install, `Ctrl-a U` update |
+Prefix is `Ctrl-a`. Plugins through TPM: resurrect and continuum (layout saved every 15 min and
+restored on start), rose-pine status bar. The project switcher (`tmux-sessionizer`) fuzzy-picks
+a directory under `~/programming` and switches to or creates its session.
 
-`Ctrl-h/j/k/l` moves between Neovim splits and tmux panes without distinction (vim-tmux-navigator
-on both sides). Status bar: rose-pine.
+Neovim splits and tmux panes are navigated with one set of keys (vim-tmux-navigator on both
+sides). Copy mode uses vi keys and sends the selection to the system clipboard through the
+terminal (`set-clipboard on`, OSC 52), so it works over SSH too. True color is enabled for
+every outer terminal via `terminal-features`, not just `xterm-256color`.
 
 ## Neovim
 
@@ -107,7 +102,8 @@ Written from scratch — no distribution. Guiding principle: **don't install a p
 haven't felt.** Every plugin file opens with a one-line comment explaining why it's there.
 
 Plugin manager: [lazy.nvim](https://github.com/folke/lazy.nvim). One file per plugin under
-`lua/hasan/plugins/`.
+`lua/hasan/plugins/`. All Lua in the repo is formatted with stylua, two spaces
+(`.stylua.toml`); `<leader>cf` applies it.
 
 ### Plugins
 
@@ -117,12 +113,13 @@ Plugin manager: [lazy.nvim](https://github.com/folke/lazy.nvim). One file per pl
 | `neovim-treesitter/nvim-treesitter` | Parser and query management, syntax-aware highlighting and indentation |
 | `nvim-treesitter/nvim-treesitter-textobjects` | Select, move and swap by function, class or parameter |
 | `nvim-telescope/telescope.nvim` | Fuzzy finder for files, text, buffers and more |
+| `nvim-neo-tree/neo-tree.nvim` | File explorer for browsing unfamiliar trees and moving files in place |
 | `mason-org/mason.nvim` + `mason-lspconfig` + `nvim-lspconfig` | Language server installation and configuration |
 | `saghen/blink.cmp` | Completion from LSP, snippets, paths and buffer words |
 | `stevearc/conform.nvim` | Formatting, triggered explicitly |
 | `lewis6991/gitsigns.nvim` | Hunk signs, staging and blame |
 | `kdheepak/lazygit.nvim` | Full git UI in a floating window |
-| `rose-pine/neovim` | Active colorscheme (alternatives installed, switch with `:Telescope colorscheme`) |
+| `alessandroyorba/alduin` | Active colorscheme (rose-pine and others installed, switch with `:Telescope colorscheme`) |
 | `nvim-lualine/lualine.nvim` | Status line |
 | `folke/which-key.nvim` | Shows available keybindings after a prefix key |
 
@@ -130,32 +127,8 @@ Language servers via Mason: `lua_ls`, `basedpyright`, `ruff`, `clangd`, `ts_ls`,
 `html`, `cssls`, `jsonls`, `bashls`, `texlab`. Formatters: `stylua`, `prettier`, `clang-format`,
 `ruff format`.
 
-### Key mappings
-
-Leader: `<Space>`
-
-| Key | Mode | Action |
-|---|---|---|
-| `<leader>w` / `<leader>q` | n | Write / quit |
-| `<Esc>` | n | Clear search highlight |
-| `<leader>p` | v | Paste over selection without clobbering the register |
-| `J` / `K` | v | Move selected lines down / up |
-| `<` / `>` | v | Indent / dedent, keeping the selection |
-| `<C-h/j/k/l>` | n | Move between splits and tmux panes |
-| `<leader>ff` `fg` `fb` `fr` `fh` `fk` `fd` `f/` | n | Telescope: files, grep, buffers, recent, help, keymaps, diagnostics, current buffer |
-| `af`/`if` `ac`/`ic` `aa`/`ia` | o, x | Text objects: function, class, parameter |
-| `]f` / `[f` | n | Next / previous function |
-| `<leader>sa` / `<leader>sA` | n | Swap parameter with next / previous |
-| `gd` / `gD` | n | Go to definition / declaration |
-| `<leader>e` | n | Diagnostic under the cursor |
-| `<leader>h` | n | Toggle inlay hints |
-| `<leader>cf` | n, v | Format buffer / selection |
-| `<leader>gg` | n | lazygit |
-| `]h` / `[h` | n | Next / previous hunk |
-| `<leader>gs` `gr` `gp` `gb` `gd` | n | Hunk: stage, reset, preview, blame, diff |
-| `<C-space>` `<C-n>` `<C-p>` `<C-y>` `<C-e>` | i | Completion: open, next, previous, accept, dismiss |
-
-Neovim's built-in LSP mappings are used as-is: `K`, `grn`, `gra`, `grr`, `gri`, `gO`, `]d`, `[d`.
+Leader is `<Space>`; Neovim's built-in LSP mappings are used as-is and which-key names the
+leader prefixes. The full list is in [KEYBINDS.md](KEYBINDS.md#neovim).
 
 ## Hyprland
 
@@ -164,25 +137,21 @@ from `hyprland.lua`: `look.lua`, `binds.lua`, `rules.lua`, `autostart.lua`, plus
 `machine.lua` for monitors. `.luarc.json` points lua_ls at Hyprland's API stubs so the `hl.*`
 API completes in Neovim.
 
-Mod key: `Super`
+Started with the session: waybar, hyprpaper, hypridle (`hypridle.conf`: lock after 5 min,
+screen off after 10, lock before sleep), mako (notifications, `hypr/.config/mako/config`),
+hyprpolkitagent (password prompts for GUI apps) and two `wl-paste --watch cliphist store`
+watchers for clipboard history. Lock screen is hyprlock (`hyprlock.conf`), also triggered by
+the lid switch. Launcher is wofi (`hypr/.config/wofi/`), used for both `drun` and the clipboard
+picker. Screenshots go through `scripts/.local/bin/screenshot`: clipboard, a PNG under
+`~/Pictures/Screenshots` and a notification.
 
-| Key | Action |
-|---|---|
-| `Super+Return` | Terminal (kitty) |
-| `Super+D` | Launcher (wofi) |
-| `Super+Q` | Close window |
-| `Super+H/J/K/L` | Focus left / down / up / right |
-| `Super+Shift+H/J/K/L` | Move window |
-| `Super+1..5` / `Super+Shift+1..5` | Go to / move window to workspace |
-| `Super+Tab` | Previous workspace |
-| `Super+F` / `V` / `P` / `S` | Fullscreen / float / pseudo-tile / toggle split |
-| `Super+B` / `Super+Shift+B` | Toggle / restart waybar |
-| `Super+Shift+E` | Exit Hyprland |
-| `Super` + drag | Move (left) / resize (right) window |
+Mod key is `Super`, layout vim-style (`H/J/K/L` focus, `Shift` moves). All bindings are in
+[KEYBINDS.md](KEYBINDS.md#hyprland).
 
 Wallpaper: hyprpaper, image at `hypr/.config/hypr/wallpapers/default.jpg`.
-Bar: waybar with a rose-pine stylesheet. Terminal colors: `kitten themes` writes
-`current-theme.conf`.
+Bar: waybar with a rose-pine stylesheet. Terminal colors: rose-pine in
+`kitty/.config/kitty/current-theme.conf`, committed so every machine matches; `kitten themes`
+rewrites it if you want to try another.
 
 ## Notes
 
@@ -198,6 +167,12 @@ install snippet — don't copy it. Textobject queries ship with `nvim-treesitter
 
 **LSP setup is three jobs.** Mason installs the server, nvim-lspconfig supplies its config,
 Neovim activates it with `vim.lsp.enable`. The old `require("lspconfig").x.setup{}` API is gone.
+
+**`.stylua.toml` exists three times.** stylua looks for its config next to the file being
+formatted, and the editor sees `~/.config/nvim`, not the repo, so the copies inside the `nvim`
+and `hypr` packages are what conform finds. The repo-root copy is for running `stylua` from here.
+Note that stylua skips hidden directories; pass the files explicitly (`stylua $(git ls-files
+'*.lua')`).
 
 **Formatting is manual** (`<leader>cf`) so shared projects with different formatter settings
 don't produce noisy diffs.
@@ -222,8 +197,8 @@ Inside Neovim: `:Lazy`, `:Mason`, `:TSStatus`, `:checkhealth`, `:checkhealth vim
 
 ## Roadmap
 
-- [ ] Notifications (mako), screenshots (grim + slurp), lock and idle (hyprlock, hypridle), wofi theme, clipboard history
-- [ ] File explorer for Neovim — decide after living with Telescope
+- [x] Notifications (mako), screenshots (grim + slurp), lock and idle (hyprlock, hypridle), wofi theme, clipboard history
+- [x] File explorer for Neovim — neo-tree, after living with Telescope
 - [ ] LaTeX: TeX Live and vimtex
 - [ ] OSC 52 clipboard for remote sessions
 - [ ] Node version manager (fnm) when project-specific versions are needed

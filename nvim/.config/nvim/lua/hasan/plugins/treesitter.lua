@@ -7,18 +7,36 @@ return {
   config = function()
     require("nvim-treesitter").install({
       -- config and shell
-      "lua", "vim", "vimdoc", "query", "bash",
+      "lua",
+      "vim",
+      "vimdoc",
+      "query",
+      "bash",
       -- data and docs
-      "json", "yaml", "toml", "markdown", "markdown_inline",
+      "json",
+      "yaml",
+      "toml",
+      "markdown",
+      "markdown_inline",
       -- languages in active use
-      "python", "c", "cpp", "cmake", "latex",
+      "python",
+      "c",
+      "cpp",
+      "cmake",
+      "latex",
       -- web stack
-      "html", "css", "javascript", "typescript", "tsx", "svelte",
+      "html",
+      "css",
+      "javascript",
+      "typescript",
+      "tsx",
+      "svelte",
       -- git
-      "gitcommit", "diff",
+      "gitcommit",
+      "diff",
     })
 
--- Features are opt-in: enable them for any buffer that has a parser installed
+    -- Features are opt-in: enable them for any buffer that has a parser installed
     vim.api.nvim_create_autocmd("FileType", {
       callback = function(args)
         local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)

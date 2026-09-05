@@ -1,0 +1,54 @@
+/* Launcher styling: rose-pine, matching waybar and mako */
+
+* {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 13px;
+}
+
+window {
+  background-color: #191724;
+  border: 2px solid #c4a7e7;
+  border-radius: 6px;
+}
+
+#outer-box {
+  margin: 8px;
+}
+
+#input {
+  margin-bottom: 8px;
+  padding: 8px;
+  color: #e0def4;
+  background-color: #1f1d2e;
+  border: 1px solid #26233a;
+  border-radius: 6px;
+}
+
+#input:focus {
+  border-color: #c4a7e7;
+}
+
+#scroll {
+  margin: 0;
+}
+
+#entry {
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+#entry #text {
+  color: #908caa;
+}
+
+#entry:selected {
+  background-color: #26233a;
+}
+
+#entry:selected #text {
+  color: #e0def4;
+}
+
+#entry image {
+  margin-right: 8px;
+}

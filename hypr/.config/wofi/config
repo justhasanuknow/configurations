@@ -1,0 +1,11 @@
+# Launcher (drun) and dmenu picker (clipboard history): centered, fuzzy, case-insensitive
+width=600
+height=400
+location=center
+prompt=Search
+insensitive=true
+matching=fuzzy
+allow_images=true
+image_size=24
+hide_scroll=true
+no_actions=true

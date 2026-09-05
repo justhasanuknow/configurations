@@ -1,0 +1,5 @@
+# Repo-root copy so `stylua .` works from here. Keep in sync with the copies in
+# nvim/.config/nvim and hypr/.config/hypr, which the editor finds through the symlinks.
+indent_type = "Spaces"
+indent_width = 2
+column_width = 120

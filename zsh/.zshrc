@@ -17,7 +17,14 @@ setopt HIST_IGNORE_SPACE      # commands starting with a space are not saved
 setopt HIST_REDUCE_BLANKS     # trim superfluous whitespace
 
 # --- Completion --------------------------------------------------------------
-autoload -Uz compinit && compinit
+# Rebuild the completion dump once a day; otherwise trust the cached one (-C),
+# which skips the security check that makes a full compinit slow
+autoload -Uz compinit
+if [[ -n "$HOME/.zcompdump"(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C
+fi
 
 # Case-insensitive matching, and match anywhere in the word
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' 'l:|=* r:|=*'

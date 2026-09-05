@@ -1,0 +1,20 @@
+# Line endings and whitespace for every editor that opens this repo;
+# the repo is also checked out on Windows, so LF is stated explicitly
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+[*.lua]
+indent_size = 2
+
+[*.{jsonc,css,toml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

@@ -1,0 +1,4 @@
+# These files are stowed into $HOME on Linux; keep them LF even when the repo
+# is checked out on Windows, regardless of the local core.autocrlf setting
+* text=auto eol=lf
+*.jpg binary

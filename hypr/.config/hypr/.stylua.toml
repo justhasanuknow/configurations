@@ -1,0 +1,6 @@
+# Two spaces, matching the hand-written files and ftplugin/lua.lua.
+# stylua looks for this file next to the code, and ~/.config/nvim is a symlink,
+# so the copy has to live inside the package rather than at the repo root.
+indent_type = "Spaces"
+indent_width = 2
+column_width = 120

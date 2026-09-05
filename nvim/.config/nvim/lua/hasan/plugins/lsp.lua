@@ -9,17 +9,17 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   opts = {
     ensure_installed = {
-      "lua_ls",       -- Lua (this config itself)
+      "lua_ls", -- Lua (this config itself)
       "basedpyright", -- Python types
-      "ruff",         -- Python linting and formatting
-      "clangd",       -- C and C++
-      "ts_ls",        -- JavaScript and TypeScript
+      "ruff", -- Python linting and formatting
+      "clangd", -- C and C++
+      "ts_ls", -- JavaScript and TypeScript
       "svelte",
       "html",
       "cssls",
       "jsonls",
       "bashls",
-      "texlab",       -- LaTeX
+      "texlab", -- LaTeX
     },
   },
   config = function(_, opts)
@@ -52,7 +52,8 @@ return {
 
         map("gd", vim.lsp.buf.definition, "Go to definition")
         map("gD", vim.lsp.buf.declaration, "Go to declaration")
-        map("<leader>e", vim.diagnostic.open_float, "Show diagnostic")
+        -- <leader>e belongs to the file explorer; diagnostics live under the lsp prefix
+        map("<leader>ld", vim.diagnostic.open_float, "Show diagnostic")
 
         -- Inlay hints: inline type and parameter name annotations
         vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })

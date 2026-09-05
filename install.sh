@@ -20,6 +20,13 @@ STAMP="$(date +%Y%m%d%H%M%S)"
 NVIM_MIN="0.12.0"
 TREE_SITTER_MIN="0.26.1"
 
+# Upstream release assets are per-architecture; map uname -m to their names
+case "$(uname -m)" in
+    x86_64) NVIM_ARCH="x86_64"; TREE_SITTER_ARCH="x64" ;;
+    aarch64 | arm64) NVIM_ARCH="arm64"; TREE_SITTER_ARCH="arm64" ;;
+    *) NVIM_ARCH=""; TREE_SITTER_ARCH="" ;;
+esac
+
 info() { printf '\n==> %s\n' "$1"; }
 warn() { printf '\n!!  %s\n' "$1" >&2; }
 
@@ -106,11 +113,17 @@ ensure_neovim() {
         info "Installing Neovim from upstream"
     fi
 
-    local url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+    if [ -z "$NVIM_ARCH" ]; then
+        warn "No upstream Neovim build for $(uname -m); install $NVIM_MIN+ yourself."
+        return
+    fi
+
+    local dir="nvim-linux-$NVIM_ARCH"
+    local url="https://github.com/neovim/neovim/releases/latest/download/$dir.tar.gz"
     curl -Lo /tmp/nvim.tar.gz "$url"
-    sudo rm -rf /opt/nvim-linux-x86_64
+    sudo rm -rf "/opt/$dir"
     sudo tar -C /opt -xzf /tmp/nvim.tar.gz
-    sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+    sudo ln -sf "/opt/$dir/bin/nvim" /usr/local/bin/nvim
     hash -r
 }
 
@@ -127,7 +140,12 @@ ensure_tree_sitter() {
         info "Installing tree-sitter CLI from upstream"
     fi
 
-    local url="https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-cli-linux-x64.zip"
+    if [ -z "$TREE_SITTER_ARCH" ]; then
+        warn "No upstream tree-sitter build for $(uname -m); install $TREE_SITTER_MIN+ yourself."
+        return
+    fi
+
+    local url="https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-cli-linux-$TREE_SITTER_ARCH.zip"
     curl -Lo /tmp/tree-sitter.zip "$url"
     unzip -o /tmp/tree-sitter.zip -d /tmp
     sudo install -m 755 /tmp/tree-sitter /usr/local/bin/tree-sitter
@@ -139,16 +157,17 @@ ensure_tree_sitter() {
 install_desktop() {
     [ "$INSTALL_DESKTOP" -eq 1 ] || return 0
 
-    if [ "$DISTRO" != "arch" ]; then
-        warn "Desktop setup is only supported on Arch-based systems, skipping."
-        return 0
-    fi
-
     info "Installing Hyprland desktop packages"
+    # Compositor, portal, bar, wallpaper, launcher, terminal and font
+    # Then the pieces a session needs to be usable: lock and idle, notifications,
+    # polkit prompts, screenshots, clipboard and its history, brightness and media keys
     sudo pacman -S --needed --noconfirm \
         hyprland xdg-desktop-portal-hyprland \
         kitty wofi waybar hyprpaper \
-        ttf-jetbrains-mono-nerd
+        ttf-jetbrains-mono-nerd \
+        hyprlock hypridle mako hyprpolkitagent \
+        grim slurp wl-clipboard cliphist \
+        brightnessctl playerctl
 
     # Machine-specific Hyprland settings are never committed; seed from the template
     local machine="$REPO_DIR/hypr/.config/hypr/machine.lua"
@@ -294,11 +313,18 @@ main() {
         esac
     done
 
+    info "Detected distribution: $DISTRO"
+
+    # The desktop packages only exist on Arch; without them there is no point
+    # in linking their configs either
+    if [ "$INSTALL_DESKTOP" -eq 1 ] && [ "$DISTRO" != "arch" ]; then
+        warn "Desktop setup is only supported on Arch-based systems, skipping."
+        INSTALL_DESKTOP=0
+    fi
+
     if [ "$INSTALL_DESKTOP" -eq 1 ]; then
         PACKAGES+=("${DESKTOP_PACKAGES[@]}")
     fi
-
-    info "Detected distribution: $DISTRO"
 
     install_packages
     ensure_neovim

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Take a screenshot with grim, copy it to the clipboard, keep a PNG and notify.
+#
+# Usage:
+#   screenshot region   pick an area with slurp
+#   screenshot screen   the whole output
+
+set -euo pipefail
+
+dir="$HOME/Pictures/Screenshots"
+file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
+
+mode="${1:-}"
+case "$mode" in
+    region)
+        # slurp exits non-zero when the selection is cancelled with Escape
+        geometry="$(slurp)" || exit 0
+        grim_args=(-g "$geometry")
+        ;;
+    screen)
+        grim_args=()
+        ;;
+    *)
+        echo "Usage: $0 region|screen" >&2
+        exit 1
+        ;;
+esac
+
+mkdir -p "$dir"
+grim "${grim_args[@]}" "$file"
+wl-copy --type image/png <"$file"
+
+notify-send -i "$file" "Screenshot" "Copied to clipboard and saved as $(basename "$file")"
