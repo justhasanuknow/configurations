@@ -6,7 +6,14 @@ hl.config({
     layout = "dwindle",
   },
   decoration = {
-    rounding = 6,
+    rounding = 3,
+    active_opacity = 0.95,
+    inactive_opacity = 0.80,
+    blur = {
+      enabled = true,
+      size = 6,
+      passes = 2,
+    },
   },
   animations = {
     enabled = true,
