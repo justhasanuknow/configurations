@@ -22,9 +22,9 @@ TREE_SITTER_MIN="0.26.1"
 
 # Upstream release assets are per-architecture; map uname -m to their names
 case "$(uname -m)" in
-    x86_64) NVIM_ARCH="x86_64"; TREE_SITTER_ARCH="x64" ;;
-    aarch64 | arm64) NVIM_ARCH="arm64"; TREE_SITTER_ARCH="arm64" ;;
-    *) NVIM_ARCH=""; TREE_SITTER_ARCH="" ;;
+    x86_64) NVIM_ARCH="x86_64"; TREE_SITTER_ARCH="x64"; FNM_ARCH="linux" ;;
+    aarch64 | arm64) NVIM_ARCH="arm64"; TREE_SITTER_ARCH="arm64"; FNM_ARCH="arm64" ;;
+    *) NVIM_ARCH=""; TREE_SITTER_ARCH=""; FNM_ARCH="" ;;
 esac
 
 info() { printf '\n==> %s\n' "$1"; }
@@ -69,7 +69,8 @@ install_packages_debian() {
     sudo apt update
     sudo apt install -y \
         git stow tmux build-essential curl unzip \
-        nodejs npm python3-venv ripgrep fd-find lazygit fzf zsh
+        nodejs npm python3-venv ripgrep fd-find lazygit fzf zsh \
+        texlive-latex-recommended texlive-fonts-recommended latexmk
 
     # fd ships as fdfind on Debian and Ubuntu
     mkdir -p "$HOME/.local/bin"
@@ -80,10 +81,12 @@ install_packages_debian() {
 
 install_packages_arch() {
     info "Installing packages with pacman"
+    # texlive-binextra carries latexmk
     sudo pacman -S --needed --noconfirm \
         git stow tmux base-devel curl unzip \
-        nodejs npm ripgrep fd lazygit fzf zsh starship \
-        neovim tree-sitter-cli
+        nodejs npm ripgrep fd lazygit fzf zsh starship fnm \
+        neovim tree-sitter-cli \
+        texlive-basic texlive-latex texlive-latexrecommended texlive-fontsrecommended texlive-binextra
 }
 
 install_packages() {
@@ -94,6 +97,7 @@ install_packages() {
             warn "Unknown distribution, skipping package installation."
             warn "Install these yourself: git stow tmux curl unzip a C compiler"
             warn "nodejs npm ripgrep fd lazygit fzf zsh starship neovim tree-sitter-cli"
+            warn "fnm, and a TeX Live with latexmk"
             ;;
     esac
 }
@@ -152,6 +156,27 @@ ensure_tree_sitter() {
     hash -r
 }
 
+# Node version manager: packaged on Arch (installed above), not on Debian
+ensure_fnm() {
+    if command -v fnm >/dev/null; then
+        info "fnm already installed"
+        return
+    fi
+
+    if [ -z "$FNM_ARCH" ]; then
+        warn "No upstream fnm build for $(uname -m); install it yourself."
+        return
+    fi
+
+    info "Installing fnm from upstream"
+    local url="https://github.com/Schniz/fnm/releases/latest/download/fnm-$FNM_ARCH.zip"
+    curl -Lo /tmp/fnm.zip "$url"
+    unzip -o /tmp/fnm.zip -d /tmp
+    mkdir -p "$HOME/.local/bin"
+    install -m 755 /tmp/fnm "$HOME/.local/bin/fnm"
+    hash -r
+}
+
 # --- Desktop (Hyprland) ------------------------------------------------------
 
 install_desktop() {
@@ -161,13 +186,15 @@ install_desktop() {
     # Compositor, portal, bar, wallpaper, launcher, terminal and font
     # Then the pieces a session needs to be usable: lock and idle, notifications,
     # polkit prompts, screenshots, clipboard and its history, brightness and media keys
+    # zathura is the PDF viewer vimtex opens
     sudo pacman -S --needed --noconfirm \
         hyprland xdg-desktop-portal-hyprland \
         kitty wofi waybar hyprpaper \
         ttf-jetbrains-mono-nerd \
         hyprlock hypridle mako hyprpolkitagent \
         grim slurp wl-clipboard cliphist \
-        brightnessctl playerctl
+        brightnessctl playerctl \
+        zathura zathura-pdf-mupdf
 
     # Machine-specific Hyprland settings are never committed; seed from the template
     local machine="$REPO_DIR/hypr/.config/hypr/machine.lua"
@@ -329,6 +356,7 @@ main() {
     install_packages
     ensure_neovim
     ensure_tree_sitter
+    ensure_fnm
     install_desktop
     setup_git_identity
     backup_conflicts

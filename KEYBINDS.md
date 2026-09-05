@@ -75,10 +75,28 @@ cut / paste, `H` toggle hidden files, `R` refresh, `?` all mappings.
 | `<leader>d` | n | Toggle diagnostics for the buffer |
 | `<leader>lh` | n | Toggle inlay hints |
 | `<leader>cf` | n, v | Format buffer / selection |
+| `<leader>cm` | n | Toggle markdown rendering (on by default for `.md` buffers) |
 
 Neovim's built-in LSP mappings are used as-is: `K` hover, `grn` rename, `gra` code action,
 `grr` references, `gri` implementation, `gO` document symbols, `]d` / `[d` next / previous
 diagnostic.
+
+### LaTeX (vimtex, `.tex` buffers only)
+
+Local leader is also `<Space>`, so these sit next to the lsp mappings while editing LaTeX.
+
+| Key | Mode | Action |
+|---|---|---|
+| `<leader>ll` | n | Start / stop continuous compilation (latexmk) |
+| `<leader>lk` | n | Stop compilation |
+| `<leader>lv` | n | Open the PDF at the cursor (zathura on the desktop) |
+| `<leader>le` | n | Show compile errors |
+| `<leader>lt` | n | Table of contents |
+| `<leader>lc` | n | Clean auxiliary files |
+| `<leader>li` | n | Compiler and project info |
+| `dse` / `cse` / `tse` | n | Delete / change / toggle surrounding environment |
+| `dsc` / `csc` | n | Delete / change surrounding command |
+| `]]` / `[[` | n | Next / previous section |
 
 ### Git
 

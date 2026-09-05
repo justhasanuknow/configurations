@@ -26,4 +26,34 @@ vim.opt.undofile = true
 vim.opt.updatetime = 250
 vim.opt.timeoutlen = 300
 
+-- Clipboard. Locally the system clipboard is reached through wl-copy, xclip or
+-- win32yank, whichever Neovim finds. Over SSH none of those exist on the remote
+-- side, so yanks travel to the local machine's clipboard through the terminal
+-- (OSC 52; tmux passes it on with set-clipboard on). Reading the clipboard back
+-- that way needs terminal permission and stalls inside tmux, so paste returns
+-- the last thing copied instead; text from the local machine still arrives
+-- through the terminal's own paste.
 vim.opt.clipboard = "unnamedplus"
+
+if vim.env.SSH_TTY then
+  local osc52 = require("vim.ui.clipboard.osc52")
+  local last = { {}, "v" }
+
+  local function copy(reg)
+    local send = osc52.copy(reg)
+    return function(lines, regtype)
+      last = { lines, regtype }
+      send(lines, regtype)
+    end
+  end
+
+  local function paste()
+    return last
+  end
+
+  vim.g.clipboard = {
+    name = "OSC 52",
+    copy = { ["+"] = copy("+"), ["*"] = copy("*") },
+    paste = { ["+"] = paste, ["*"] = paste },
+  }
+end

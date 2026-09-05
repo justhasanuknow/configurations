@@ -44,13 +44,17 @@ Everything below is installed by `install.sh` on Debian/Ubuntu and Arch-based sy
 - tmux 3.x, zsh, starship, fzf, ripgrep, fd, lazygit
 - Neovim 0.12+ and tree-sitter CLI 0.26.1+ (Ubuntu ships older versions; the script
   installs both from upstream releases, for x86_64 and aarch64)
-- Node.js, npm, python3-venv — for language servers
+- Node.js, npm, python3-venv — for language servers; fnm for per-project Node versions
+  (packaged on Arch, upstream release elsewhere)
+- TeX Live with latexmk (`texlive-latex-recommended` on Debian, the `texlive-basic`/`latex`/
+  `latexrecommended`/`fontsrecommended`/`binextra` set on Arch); grow it as documents need
 - A Nerd Font in your terminal (`ttf-jetbrains-mono-nerd` on Arch; install manually elsewhere)
 
 Desktop (`--desktop`, Arch only): hyprland, xdg-desktop-portal-hyprland, hyprpaper, waybar,
 kitty, wofi, plus what makes a session usable: hyprlock, hypridle, mako, hyprpolkitagent,
-grim, slurp, wl-clipboard, cliphist, brightnessctl, playerctl. On other distributions
-`--desktop` is ignored and the desktop packages are not linked.
+grim, slurp, wl-clipboard, cliphist, brightnessctl, playerctl, and zathura as the PDF viewer
+for vimtex. On other distributions `--desktop` is ignored and the desktop packages are not
+linked.
 
 ## Installation
 
@@ -85,6 +89,9 @@ history search, file and directory pickers; `fd` feeds them and respects `.gitig
 
 Aliases: `v` → nvim, `lg` → lazygit, `ll` → `ls -lah`.
 
+Node versions come from fnm: a directory with `.node-version` or `.nvmrc` switches on `cd`
+(`fnm install` once per version). The distro `nodejs` stays for Mason's language servers.
+
 ## tmux
 
 Prefix is `Ctrl-a`. Plugins through TPM: resurrect and continuum (layout saved every 15 min and
@@ -117,6 +124,8 @@ Plugin manager: [lazy.nvim](https://github.com/folke/lazy.nvim). One file per pl
 | `mason-org/mason.nvim` + `mason-lspconfig` + `nvim-lspconfig` | Language server installation and configuration |
 | `saghen/blink.cmp` | Completion from LSP, snippets, paths and buffer words |
 | `stevearc/conform.nvim` | Formatting, triggered explicitly |
+| `MeanderingProgrammer/render-markdown.nvim` | Markdown rendered in the buffer, toggled per file |
+| `lervag/vimtex` | LaTeX: latexmk compilation, PDF viewer sync, TOC; texlab does completion and diagnostics |
 | `lewis6991/gitsigns.nvim` | Hunk signs, staging and blame |
 | `kdheepak/lazygit.nvim` | Full git UI in a floating window |
 | `alessandroyorba/alduin` | Active colorscheme (rose-pine and others installed, switch with `:Telescope colorscheme`) |
@@ -177,7 +186,12 @@ Note that stylua skips hidden directories; pass the files explicitly (`stylua $(
 **Formatting is manual** (`<leader>cf`) so shared projects with different formatter settings
 don't produce noisy diffs.
 
-**Clipboard over SSH** does not work with `clipboard = "unnamedplus"`; OSC 52 is planned.
+**Clipboard over SSH.** When `$SSH_TTY` is set, Neovim switches to the built-in OSC 52
+provider: yanks go through the terminal to the local machine's clipboard, and tmux forwards
+them (`set-clipboard on`). Pasting with `p` reuses the last yank rather than querying the
+clipboard back, since that needs terminal permission and stalls under tmux; text from the local
+machine comes in through the terminal's normal paste. Locally nothing changes:
+`clipboard = "unnamedplus"` with wl-copy, xclip or win32yank.
 
 **kitty in VMware** crashes under Wayland; `linux_display_server x11` in `kitty/local.conf` works
 around it. Real hardware needs nothing.
@@ -199,6 +213,6 @@ Inside Neovim: `:Lazy`, `:Mason`, `:TSStatus`, `:checkhealth`, `:checkhealth vim
 
 - [x] Notifications (mako), screenshots (grim + slurp), lock and idle (hyprlock, hypridle), wofi theme, clipboard history
 - [x] File explorer for Neovim — neo-tree, after living with Telescope
-- [ ] LaTeX: TeX Live and vimtex
-- [ ] OSC 52 clipboard for remote sessions
-- [ ] Node version manager (fnm) when project-specific versions are needed
+- [x] LaTeX: TeX Live and vimtex
+- [x] OSC 52 clipboard for remote sessions
+- [x] Node version manager (fnm) when project-specific versions are needed

@@ -79,6 +79,13 @@ zsh_plugin zsh-users/zsh-autosuggestions
 # Must be loaded last; it hooks into everything that came before
 zsh_plugin zsh-users/zsh-syntax-highlighting
 
+# --- Node --------------------------------------------------------------------
+# fnm switches Node per project: entering a directory with .node-version or
+# .nvmrc runs `fnm use`. One fork at startup, none per prompt
+if command -v fnm >/dev/null; then
+    eval "$(fnm env --use-on-cd --shell zsh)"
+fi
+
 # --- Prompt ------------------------------------------------------------------
 if command -v starship >/dev/null; then
     eval "$(starship init zsh)"
